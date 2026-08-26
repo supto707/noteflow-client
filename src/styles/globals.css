@@ -1,0 +1,75 @@
+html {
+  scroll-behavior: smooth;
+}
+
+html, body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior-y: none;
+}
+
+/* Smooth theme transitions - only apply to non-contentEditable elements */
+html.theme-transitioning *:not([contenteditable="true"]),
+html.theme-transitioning *:not([contenteditable="true"])::before,
+html.theme-transitioning *:not([contenteditable="true"])::after {
+  transition: background-color 0.3s ease,
+              color 0.3s ease,
+              border-color 0.3s ease,
+              box-shadow 0.3s ease !important;
+}
+
+/* Global smooth transitions for theme-aware properties (excluding contentEditable) */
+*:not([contenteditable="true"]) {
+  transition: background-color 0.15s ease,
+              color 0.1s ease,
+              border-color 0.15s ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+/* Selection styling */
+::selection {
+  background: rgba(99, 87, 232, 0.25);
+}
+
+/* Focus ring for accessibility */
+*:focus-visible {
+  outline: 2px solid rgba(99, 87, 232, 0.5);
+  outline-offset: 2px;
+}
+
+/* Page transition animation */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.page-exit {
+  opacity: 1;
+}
+.page-exit-active {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
