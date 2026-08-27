@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Home, FileText, Database, BookOpen, Settings,
   Search, Sun, Moon, ChevronRight, Plus, Menu, X,
-  Inbox, Star, Trash2, Hash, Clock, LogOut
+  Inbox, Star, Trash2, Hash, Clock, LogOut, PenLine
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";

@@ -79,7 +79,21 @@ export default function Settings() {
   const [notifs, setNotifs] = useState(notifSettings.map(n => n.enabled));
 
   return (
-    <div className="flex h-full" style={{ fontFamily: "'DM Sans', sans-serif", background: dark ? "#0A0A08" : "#F7F6F2" }}>
+    <div className="flex flex-col md:flex-row h-full" style={{ fontFamily: "'DM Sans', sans-serif", background: dark ? "#0A0A08" : "#F7F6F2" }}>
+      {/* Mobile tabs */}
+      <div className="md:hidden overflow-x-auto" style={{ borderBottom: `1px solid ${border}`, background: panelBg }}>
+        <div className="flex gap-1 px-3 py-2" style={{ scrollbarWidth: "none" }}>
+          {sections.map(({ id, label, icon: Icon }) => (
+            <button key={id} onClick={() => setActive(id)}
+              className="flex items-center gap-1.5 rounded-lg flex-shrink-0 transition-colors"
+              style={{ padding: "6px 10px", background: active === id ? (dark ? "rgba(99,87,232,0.16)" : "rgba(99,87,232,0.09)") : "transparent", border: "none", cursor: "pointer", fontSize: 12, fontWeight: active === id ? 500 : 400, color: active === id ? "#6357E8" : sub, whiteSpace: "nowrap" }}>
+              <Icon size={12} style={{ flexShrink: 0 }} /> {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Desktop sidebar */}
       <div className="hidden md:flex flex-col flex-shrink-0 border-r" style={{ width: 220, background: panelBg, borderColor: border, padding: "24px 12px" }}>
         <div style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 15, fontWeight: 700, color: fg, padding: "0 8px", marginBottom: 16 }}>Settings</div>
         {sections.map(({ id, label, icon: Icon }) => (
@@ -100,7 +114,7 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto" style={{ padding: "40px 48px", scrollbarWidth: "none" }}>
+      <div className="flex-1 overflow-auto px-4 py-6 sm:px-12" style={{ scrollbarWidth: "none" }}>
         <motion.div key={active} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, ease: EASE }} style={{ maxWidth: 600 }}>
 
@@ -151,7 +165,7 @@ export default function Settings() {
 
               <div style={{ marginBottom: 32 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: fg, marginBottom: 14 }}>Theme</div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                   {([
                     { id: "light", label: "Light", icon: Sun },
                     { id: "dark", label: "Dark", icon: Moon },
@@ -202,12 +216,12 @@ export default function Settings() {
                 { title: "Active sessions", desc: `You are signed in on your current device.`, btn: "Manage sessions", btnColor: fg },
                 { title: "Delete account", desc: "Permanently delete your account and all your data. This cannot be undone.", btn: "Delete account", btnColor: "#EF4444" },
               ].map(item => (
-                <div key={item.title} className="flex items-start justify-between pb-6 mb-6" style={{ borderBottom: `1px solid ${border}` }}>
-                  <div style={{ maxWidth: 360 }}>
+                <div key={item.title} className="flex flex-col sm:flex-row sm:items-start sm:justify-between pb-6 mb-6" style={{ borderBottom: `1px solid ${border}` }}>
+                  <div className="sm:max-w-[360px] mb-3 sm:mb-0">
                     <div style={{ fontSize: 14, fontWeight: 500, color: fg, marginBottom: 4 }}>{item.title}</div>
                     <div style={{ fontSize: 13, color: sub, lineHeight: 1.5 }}>{item.desc}</div>
                   </div>
-                  <button style={{ padding: "7px 16px", background: item.btn === "Delete account" ? "rgba(239,68,68,0.1)" : (dark ? "rgba(255,255,255,0.08)" : "rgba(14,14,12,0.07)"), border: "none", borderRadius: 8, color: item.btnColor, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0, marginLeft: 16 }}>
+                  <button style={{ padding: "7px 16px", background: item.btn === "Delete account" ? "rgba(239,68,68,0.1)" : (dark ? "rgba(255,255,255,0.08)" : "rgba(14,14,12,0.07)"), border: "none", borderRadius: 8, color: item.btnColor, fontSize: 13, fontWeight: 500, cursor: "pointer", flexShrink: 0, alignSelf: "flex-start" }}>
                     {item.btn}
                   </button>
                 </div>
@@ -222,8 +236,8 @@ export default function Settings() {
 
               <div className="rounded-2xl border mb-8" style={{ padding: 28, background: card, borderColor: border, position: "relative", overflow: "hidden" }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg, #6357E8, #22C27D)" }} />
-                <div className="flex items-start justify-between">
-                  <div>
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between">
+                  <div className="mb-4 sm:mb-0">
                     <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: 11, color: "#22C27D", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Current plan</div>
                     <div style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: "2.5rem", fontWeight: 800, color: fg, letterSpacing: "-0.04em", lineHeight: 1 }}>Free</div>
                     <div style={{ fontSize: 14, color: sub, marginTop: 4 }}>$0 / month · Forever</div>

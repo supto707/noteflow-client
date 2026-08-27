@@ -51,7 +51,7 @@ export default function TrashPage() {
   }
 
   return (
-    <div style={{ padding: "40px 48px", maxWidth: 900, margin: "0 auto", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="px-4 py-6 sm:px-12" style={{ maxWidth: 900, margin: "0 auto", fontFamily: "'DM Sans', sans-serif" }}>
       <FadeUp delay={0.05}>
         <div className="flex items-center gap-3 mb-2">
           <div style={{ width: 36, height: 36, borderRadius: 10, background: "#EF4444" + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -78,15 +78,17 @@ export default function TrashPage() {
         <div className="flex flex-col gap-2">
           {pages.map((page, i) => (
             <FadeUp key={page.id} delay={0.05 + i * 0.04}>
-              <div className="rounded-xl border flex items-center" style={{ padding: "14px 18px", background: card, borderColor: border }}>
-                <div style={{ width: 32, height: 32, borderRadius: 8, background: "#EF4444" + "14", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginRight: 14 }}>
-                  <FileText size={14} style={{ color: "#EF4444" }} />
+              <div className="rounded-xl border flex flex-col sm:flex-row sm:items-center" style={{ padding: "14px 18px", background: card, borderColor: border }}>
+                <div className="flex items-center gap-3 flex-1 min-w-0 mb-3 sm:mb-0">
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: "#EF4444" + "14", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                    <FileText size={14} style={{ color: "#EF4444" }} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, color: fg, marginBottom: 2 }}>{page.title}</div>
+                    <div style={{ fontSize: 12, color: sub }}>Deleted · {new Date(page.updated_at).toLocaleDateString()}</div>
+                  </div>
                 </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14, fontWeight: 500, color: fg, marginBottom: 2 }}>{page.title}</div>
-                  <div style={{ fontSize: 12, color: sub }}>Deleted · {new Date(page.updated_at).toLocaleDateString()}</div>
-                </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 sm:flex-shrink-0">
                   <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                     onClick={() => handleRestore(page.id)}
                     className="flex items-center gap-1.5 rounded-lg transition-colors"

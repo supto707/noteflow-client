@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion } from "motion/react";
-import { Plus, Search, Tag, Clock, Star, MoreHorizontal, Bold, Italic, Code, List, Hash, Link2, Image, FileText, GripVertical, Trash2, Copy, ArrowUp, ArrowDown, Type, Heading1, Heading2, Heading3, ListOrdered, CheckSquare, Quote, Minus, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Plus, Search, Tag, Clock, Star, MoreHorizontal, Bold, Italic, Code, List, Hash, Link2, Image, FileText, GripVertical, Trash2, Copy, ArrowUp, ArrowDown, Type, Heading1, Heading2, Heading3, ListOrdered, CheckSquare, Quote, Minus, AlertCircle, Menu, X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { getUserWorkspace, getPages, getPageById, createPage, updatePageTitle, createBlock, replacePageBlocks, trashPage } from "../../lib/api";
@@ -26,6 +26,7 @@ export default function Notes() {
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState("");
   const titleRef = useRef<HTMLInputElement>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   // Helper to decode block content (strip metadata prefix)
   function decodeBlockContent(block: Block): { content: string; checked?: boolean; indent: number } {
@@ -158,55 +159,85 @@ export default function Notes() {
     setEditingTitle(false);
   }, [selected, titleValue]);
 
+  const NotesSidebar = () => (
+    <>
+      <div style={{ padding: "20px 16px 12px" }}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 16, fontWeight: 700, color: fg }}>Notes</h2>
+          <button className="rounded-lg flex items-center justify-center transition-colors"
+            style={{ width: 28, height: 28, background: "#6357E8", border: "none", cursor: "pointer" }}
+            onClick={handleNewNote}>
+            <Plus size={14} className="text-white" />
+          </button>
+        </div>
+        <div className="flex items-center gap-2 rounded-lg" style={{ padding: "8px 12px", background: dark ? "rgba(255,255,255,0.05)" : "rgba(14,14,12,0.06)", border: `1px solid ${border}` }}>
+          <Search size={12} style={{ color: sub, flexShrink: 0 }} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notes…"
+            style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 13, color: fg, fontFamily: "'DM Sans', sans-serif" }} />
+        </div>
+      </div>
+
+      <div className="flex gap-1.5 overflow-x-auto px-4 pb-3" style={{ scrollbarWidth: "none" }}>
+        {["All"].map(t => (
+          <button key={t} onClick={() => setActiveTag(t)}
+            className="rounded-full flex-shrink-0 transition-all duration-150"
+            style={{ padding: "4px 12px", fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer", background: activeTag === t ? "#6357E8" : (dark ? "rgba(255,255,255,0.07)" : "rgba(14,14,12,0.07)"), color: activeTag === t ? "white" : sub }}>
+            {t}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+        {filtered.map(page => (
+          <motion.div key={page.id} whileHover={{ x: 2 }}
+            onClick={() => { handleSelect(page); setMobileSidebarOpen(false); }}
+            className="cursor-pointer border-b"
+            style={{ padding: "14px 16px", borderColor: border, background: selected?.id === page.id ? activeBg : "transparent" }}>
+            <div className="flex items-start justify-between gap-1 mb-2">
+              <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 14, fontWeight: 600, color: fg, lineHeight: 1.3, flex: 1 }}>
+                {page.title}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span style={{ fontSize: 10, color: sub }}>
+                {new Date(page.updated_at).toLocaleDateString()}
+              </span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </>
+  );
+
   return (
     <div className="flex h-screen" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      {/* Sidebar */}
-      <div className="flex flex-col flex-shrink-0 border-r" style={{ width: 280, background: panelBg, borderColor: border }}>
-        <div style={{ padding: "20px 16px 12px" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h2 style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 16, fontWeight: 700, color: fg }}>Notes</h2>
-            <button className="rounded-lg flex items-center justify-center transition-colors"
-              style={{ width: 28, height: 28, background: "#6357E8", border: "none", cursor: "pointer" }}
-              onClick={handleNewNote}>
-              <Plus size={14} className="text-white" />
-            </button>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg" style={{ padding: "8px 12px", background: dark ? "rgba(255,255,255,0.05)" : "rgba(14,14,12,0.06)", border: `1px solid ${border}` }}>
-            <Search size={12} style={{ color: sub, flexShrink: 0 }} />
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notes…"
-              style={{ flex: 1, background: "none", border: "none", outline: "none", fontSize: 13, color: fg, fontFamily: "'DM Sans', sans-serif" }} />
-          </div>
-        </div>
-
-        <div className="flex gap-1.5 overflow-x-auto px-4 pb-3" style={{ scrollbarWidth: "none" }}>
-          {["All"].map(t => (
-            <button key={t} onClick={() => setActiveTag(t)}
-              className="rounded-full flex-shrink-0 transition-all duration-150"
-              style={{ padding: "4px 12px", fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer", background: activeTag === t ? "#6357E8" : (dark ? "rgba(255,255,255,0.07)" : "rgba(14,14,12,0.07)"), color: activeTag === t ? "white" : sub }}>
-              {t}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
-          {filtered.map(page => (
-            <motion.div key={page.id} whileHover={{ x: 2 }}
-              onClick={() => handleSelect(page)}
-              className="cursor-pointer border-b"
-              style={{ padding: "14px 16px", borderColor: border, background: selected?.id === page.id ? activeBg : "transparent" }}>
-              <div className="flex items-start justify-between gap-1 mb-2">
-                <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 14, fontWeight: 600, color: fg, lineHeight: 1.3, flex: 1 }}>
-                  {page.title}
-                </span>
+      {/* Mobile sidebar overlay */}
+      <AnimatePresence>
+        {mobileSidebarOpen && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setMobileSidebarOpen(false)} className="md:hidden fixed inset-0 z-40"
+              style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} />
+            <motion.aside initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }}
+              transition={{ duration: 0.3, ease: EASE }}
+              className="md:hidden fixed left-0 top-0 bottom-0 z-50 flex flex-col flex-shrink-0 border-r"
+              style={{ width: 280, background: panelBg, borderColor: border }}>
+              <div className="flex items-center justify-end p-2">
+                <button onClick={() => setMobileSidebarOpen(false)}
+                  className="rounded-md flex items-center justify-center"
+                  style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}>
+                  <X size={16} />
+                </button>
               </div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span style={{ fontSize: 10, color: sub }}>
-                  {new Date(page.updated_at).toLocaleDateString()}
-                </span>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              <NotesSidebar />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop sidebar */}
+      <div className="hidden md:flex flex-col flex-shrink-0 border-r" style={{ width: 280, background: panelBg, borderColor: border }}>
+        <NotesSidebar />
       </div>
 
       {/* Editor */}
@@ -214,8 +245,13 @@ export default function Notes() {
         {selected ? (
           <>
             {/* Toolbar */}
-            <div className="flex items-center gap-2 border-b flex-shrink-0" style={{ padding: "12px 28px", borderColor: border }}>
-              <div className="flex items-center gap-1 mr-2">
+            <div className="flex items-center gap-2 border-b flex-shrink-0" style={{ padding: "10px 12px sm:px-7", borderColor: border }}>
+              <button onClick={() => setMobileSidebarOpen(true)}
+                className="md:hidden rounded-md flex items-center justify-center flex-shrink-0"
+                style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}>
+                <Menu size={15} />
+              </button>
+              <div className="hidden sm:flex items-center gap-1 mr-2">
                 {[Bold, Italic, Code].map((Icon, i) => (
                   <button key={i} className="rounded-md flex items-center justify-center transition-colors"
                     style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}
@@ -235,7 +271,7 @@ export default function Notes() {
                 ))}
               </div>
               <div style={{ width: 1, height: 18, background: border }} />
-              <div className="flex items-center gap-1">
+              <div className="hidden sm:flex items-center gap-1">
                 {[List, Hash, Link2, Image].map((Icon, i) => (
                   <button key={i} className="rounded-md flex items-center justify-center transition-colors"
                     style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}
@@ -246,7 +282,7 @@ export default function Notes() {
                 ))}
               </div>
               <div className="ml-auto flex items-center gap-2">
-                <span style={{ fontSize: 11, color: sub, fontFamily: "'Geist Mono', monospace" }}>
+                <span className="hidden sm:inline" style={{ fontSize: 11, color: sub, fontFamily: "'Geist Mono', monospace" }}>
                   {isSaving ? "Saving…" : lastSaved ? `Saved · ${lastSaved.toLocaleTimeString()}` : `Saved · ${new Date(selected.updated_at).toLocaleDateString()}`}
                 </span>
                 <button className="rounded-md flex items-center justify-center transition-colors"
@@ -268,7 +304,7 @@ export default function Notes() {
             </div>
 
             {/* Editor content */}
-            <div className="flex-1 overflow-y-auto" style={{ padding: "40px 64px 80px", scrollbarWidth: "none" }}>
+            <div className="flex-1 overflow-y-auto px-4 py-8 sm:px-16 lg:px-[64px] sm:pt-10 sm:pb-20" style={{ scrollbarWidth: "none" }}>
               <div className="flex items-center gap-3 mb-4">
                 <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: sub }}>
                   <Clock size={11} /> {new Date(selected.updated_at).toLocaleDateString()}

@@ -49,7 +49,7 @@ export default function RecentPage() {
   }
 
   return (
-    <div style={{ padding: "40px 48px", maxWidth: 900, margin: "0 auto", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="px-4 py-6 sm:px-12" style={{ maxWidth: 900, margin: "0 auto", fontFamily: "'DM Sans', sans-serif" }}>
       <FadeUp delay={0.05}>
         <div className="flex items-center gap-3 mb-2">
           <div style={{ width: 36, height: 36, borderRadius: 10, background: "#22C27D" + "18", display: "flex", alignItems: "center", justifyContent: "center" }}>

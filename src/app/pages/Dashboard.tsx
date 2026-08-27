@@ -66,7 +66,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div style={{ padding: "40px 48px", maxWidth: 1100, margin: "0 auto", fontFamily: "'DM Sans', sans-serif" }}>
+    <div className="px-4 py-6 sm:px-6 lg:px-12" style={{ maxWidth: 1100, margin: "0 auto", fontFamily: "'DM Sans', sans-serif" }}>
       <FadeUp delay={0.05}>
         <div style={{ marginBottom: 6 }}>
           <p style={{ fontSize: 13, color: sub, marginBottom: 4, fontFamily: "'Geist Mono', monospace", letterSpacing: "0.06em", textTransform: "uppercase" }}>
@@ -78,7 +78,7 @@ export default function Dashboard() {
         </div>
       </FadeUp>
 
-      <FadeUp delay={0.12} className="grid grid-cols-3 gap-4 mt-8 mb-8">
+      <FadeUp delay={0.12} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 mb-8">
         {[
           { label: "Notes this week", value: loading ? "—" : `${pages.length}`, icon: FileText, delta: "All time" },
           { label: "Pages created", value: loading ? "—" : `${pages.length}`, icon: TrendingUp, delta: "All time" },
