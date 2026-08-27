@@ -2,12 +2,13 @@ import { useRef, useState } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { Link } from "react-router";
 import {
-  PenLine, ArrowRight, Search, Home, Mail, MessageSquare,
+  ArrowRight, Search, Home, Mail, MessageSquare,
   Sparkles, Zap, Palette, FileText, Database, BookOpen, Globe,
   Layers, Table2, LayoutGrid, Calendar
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
+import Logo from "../components/Logo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -169,7 +170,7 @@ export default function NotFound() {
 
           <FadeUp delay={0.85} className="mt-20">
             <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="rounded-lg bg-[#6357E8] flex items-center justify-center" style={{ width: 34, height: 34 }}><PenLine size={16} className="text-white" /></div>
+              <Logo size={34} />
               <span className="font-bold tracking-tight" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, color: fg }}>NoteFlow</span>
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: sub, lineHeight: 1.75, maxWidth: 320, margin: "0 auto" }}>

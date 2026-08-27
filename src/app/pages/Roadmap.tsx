@@ -2,10 +2,11 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { Link } from "react-router";
 import {
-  PenLine, ArrowRight, ChevronRight, Check, Flag, Github, Zap, Sparkles, Bug, Trash2, Calendar, Users, Star, Lock, Globe, Database, FileText, LayoutGrid, Calendar as CalIcon
+  ArrowRight, ChevronRight, Check, Flag, Github, Zap, Sparkles, Bug, Trash2, Calendar, Users, Star, Lock, Globe, Database, FileText, LayoutGrid, Calendar as CalIcon
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
+import Logo from "../components/Logo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -202,7 +203,7 @@ export default function Roadmap() {
           <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-5">
-                <div className="rounded-lg bg-[#6357E8] flex items-center justify-center" style={{ width: 34, height: 34 }}><PenLine size={16} className="text-white" /></div>
+                <Logo size={34} />
                 <span className="font-bold tracking-tight text-white" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18 }}>NoteFlow</span>
               </div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: sub, lineHeight: 1.75, maxWidth: 240 }}>A free workspace for docs, databases, and wikis. Think clearly. Note freely.</p>

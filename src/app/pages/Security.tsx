@@ -2,10 +2,11 @@ import { useRef } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { Link } from "react-router";
 import {
-  PenLine, ArrowRight, ChevronRight, Shield, Lock, CheckCircle, AlertCircle, XCircle, Info, FileText, ExternalLink, Download, Key, Search, Eye, EyeOff, Trash2, History, Share2, Cpu, Server, Wifi, Smartphone, Monitor, Zap, Sparkles, Heart, Coffee, Code, BookOpen, Calendar, MapPin, Briefcase, DollarSign, Award, Star, Send, Copy, Github, Twitter, Globe, Wifi as WifiIcon, Bluetooth, Usb, MonitorSmartphone, HardDrive, Layers, Settings, SlidersHorizontal, ToggleLeft, ToggleRight, User, Hash, Fingerprint, Bug, BadgePercent, ClipboardCheck, BarChart, Network, Database, Laptop, Smartphone as PhoneIcon, Globe as GlobeIcon, Cloud, Command, Terminal, Key as KeyIcon, Unlock, Scan, Bell, AlertTriangle, RotateCcw, RefreshCw, Lock as LockIcon, Unlock as UnlockIcon, ShieldCheck, ShieldAlert, ShieldOff, Hash as HashIcon, FileCheck, FileAlert, FileWarning, FileCheck2, FileMinus, FilePlus, FileText as FileTextIcon, FileCode, FileJson, FileSpreadsheet, FileImage, FileVideo, FileAudio, FileArchive, FileSignature, FileLock, FileUnlock, FileKey, FileQuestion, FileCheck as FileCheckIcon
+  ArrowRight, ChevronRight, Shield, Lock, CheckCircle, AlertCircle, XCircle, Info, FileText, ExternalLink, Download, Key, Search, Eye, EyeOff, Trash2, History, Share2, Cpu, Server, Wifi, Smartphone, Monitor, Zap, Sparkles, Heart, Coffee, Code, BookOpen, Calendar, MapPin, Briefcase, DollarSign, Award, Star, Send, Copy, Github, Twitter, Globe, Wifi as WifiIcon, Bluetooth, Usb, MonitorSmartphone, HardDrive, Layers, Settings, SlidersHorizontal, ToggleLeft, ToggleRight, User, Hash, Fingerprint, Bug, BadgePercent, ClipboardCheck, BarChart, Network, Database, Laptop, Smartphone as PhoneIcon, Globe as GlobeIcon, Cloud, Command, Terminal, Key as KeyIcon, Unlock, Scan, Bell, AlertTriangle, RotateCcw, RefreshCw, Lock as LockIcon, Unlock as UnlockIcon, ShieldCheck, ShieldAlert, ShieldOff, Hash as HashIcon, FileCheck, FileAlert, FileWarning, FileCheck2, FileMinus, FilePlus, FileText as FileTextIcon, FileCode, FileJson, FileSpreadsheet, FileImage, FileVideo, FileAudio, FileArchive, FileSignature, FileLock, FileUnlock, FileKey, FileQuestion, FileCheck as FileCheckIcon
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
+import Logo from "../components/Logo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -294,7 +295,7 @@ export default function Security() {
           <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
             <div className="lg:col-span-2">
               <div className="flex items-center gap-2.5 mb-5">
-                <div className="rounded-lg bg-[#6357E8] flex items-center justify-center" style={{ width: 34, height: 34 }}><PenLine size={16} className="text-white" /></div>
+                <Logo size={34} />
                 <span className="font-bold tracking-tight text-white" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18 }}>NoteFlow</span>
               </div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: sub, lineHeight: 1.75, maxWidth: 240 }}>A free workspace for docs, databases, and wikis. Think clearly. Note freely.</p>

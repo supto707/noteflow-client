@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { PenLine, Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, ArrowLeft } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import Logo from "../components/Logo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -68,9 +69,7 @@ export default function Login() {
         <div className="absolute -bottom-20 -right-20 rounded-full pointer-events-none" style={{ width: 400, height: 400, background: "radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 65%)" }} />
 
         <div className="relative flex items-center gap-3">
-          <div className="rounded-xl bg-white/20 flex items-center justify-center" style={{ width: 40, height: 40 }}>
-            <PenLine size={18} className="text-white" />
-          </div>
+          <Logo size={40} rounded="xl" />
           <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 20, fontWeight: 700, color: "white" }}>NoteFlow</span>
         </div>
 
@@ -131,9 +130,7 @@ export default function Login() {
           <Link to="/" style={{ display: "flex", alignItems: "center", gap: 8, color: sub, fontSize: 14, fontWeight: 500, textDecoration: "none", transition: "color 0.2s", fontFamily: "'DM Sans', sans-serif" }} onMouseEnter={e => e.currentTarget.style.color = fg} onMouseLeave={e => e.currentTarget.style.color = sub}>
             <ArrowLeft size={15} /> Back to NoteFlow
           </Link>
-          <div className="rounded-lg bg-[#6357E8] flex items-center justify-center" style={{ width: 32, height: 32 }}>
-            <PenLine size={15} className="text-white" />
-          </div>
+          <Logo size={32} />
           <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 700, color: fg }}>NoteFlow</span>
         </div>
 

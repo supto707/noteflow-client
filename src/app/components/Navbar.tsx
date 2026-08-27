@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { PenLine, Sun, Moon, Menu, X, ArrowRight, ChevronDown } from "lucide-react";
+import { Sun, Moon, Menu, X, ArrowRight, ChevronDown } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
+import Logo from "./Logo";
 
 const dropdownGroups = [
   {
@@ -106,7 +107,7 @@ export default function Navbar() {
       style={{ background: scrolled ? bg : "transparent", backdropFilter: scrolled ? "blur(20px)" : "none", borderBottom: `1px solid ${scrolled ? borderColor : "transparent"}` }}>
       <nav className="max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between" style={{ height: 68 }}>
         <Link to="/" onClick={closeAll} style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
-          <div className="rounded-lg bg-[#6357E8] flex items-center justify-center" style={{ width: 34, height: 34 }}><PenLine size={16} className="text-white" /></div>
+          <Logo size={34} />
           <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18, fontWeight: 700, color: fg }}>NoteFlow</span>
         </Link>
 

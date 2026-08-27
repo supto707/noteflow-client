@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { Link } from "react-router";
 import {
-  PenLine, ArrowRight, Check, ChevronRight, ChevronDown,
+  ArrowRight, Check, ChevronRight, ChevronDown,
   FileText, Database, BookOpen, Globe,
   Layers, Table2, LayoutGrid, Calendar, Link2, Download, Search,
   Zap, Shield, Cpu, GitBranch, Code, Terminal, Palette, Sparkles,
@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
+import Logo from "../components/Logo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -279,9 +280,7 @@ export default function Docs() {
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <Link to="/docs" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none", color: fg }}>
-            <div className="rounded-lg bg-[#6357E8] flex items-center justify-center" style={{ width: 32, height: 32 }}>
-              <PenLine size={16} className="text-white" />
-            </div>
+            <Logo size={32} />
             <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 16, fontWeight: 700 }}>NoteFlow Docs</span>
           </Link>
           <button onClick={() => setSidebarOpen(false)} style={{ background: "transparent", border: "none", color: sub, cursor: "pointer" }}><X size={22} /></button>
@@ -443,7 +442,7 @@ function Footer() {
         <div className="grid md:grid-cols-2 lg:grid-cols-6 gap-12 mb-16">
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-5">
-              <div className="rounded-lg bg-[#6357E8] flex items-center justify-center" style={{ width: 34, height: 34 }}><PenLine size={16} className="text-white" /></div>
+              <Logo size={34} />
               <span className="font-bold tracking-tight text-white" style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 18 }}>NoteFlow</span>
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: sub, lineHeight: 1.75, maxWidth: 240 }}>A free workspace for docs, databases, and wikis. Think clearly. Note freely.</p>

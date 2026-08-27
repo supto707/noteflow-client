@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  PenLine, Home, FileText, Database, BookOpen, Settings,
+  Home, FileText, Database, BookOpen, Settings,
   Search, Sun, Moon, ChevronRight, Plus, Menu, X,
   Inbox, Star, Trash2, Hash, Clock, LogOut
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { getUserProfile, getUserWorkspace, getPages, createPage } from "../../lib/api";
+import Logo from "../components/Logo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -85,15 +86,13 @@ export default function DashboardLayout() {
       <div className="flex items-center justify-between" style={{ padding: collapsed ? "18px 16px" : "18px 16px 18px 20px", marginBottom: 4 }}>
         {!collapsed && (
           <div className="flex items-center gap-2.5">
-            <div className="rounded-lg bg-[#6357E8] flex items-center justify-center flex-shrink-0" style={{ width: 30, height: 30 }}>
-              <PenLine size={14} className="text-white" />
-            </div>
+            <Logo size={30} />
             <span style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: 16, fontWeight: 700, color: fg }}>NoteFlow</span>
           </div>
         )}
         {collapsed && (
-          <div className="rounded-lg bg-[#6357E8] flex items-center justify-center mx-auto" style={{ width: 30, height: 30 }}>
-            <PenLine size={14} className="text-white" />
+          <div className="mx-auto">
+            <Logo size={30} />
           </div>
         )}
         {!collapsed && (
