@@ -1,8 +1,8 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { Link } from "react-router";
 import {
-  ArrowRight, ChevronRight, Search, Filter, FileText, Database, BookOpen, Calendar, Users, LayoutGrid, Table2, Zap, Sparkles, Heart, Tag, Download, ExternalLink, Plus, Star, Clock, MapPin, Briefcase, Coffee, Music, Camera, Gamepad2, Dumbbell, BookOpen as BookOpenIcon, Lightbulb, Target, TrendingUp, Rocket
+  ArrowRight, ChevronRight, Search, Filter, FileText, Database, BookOpen, Calendar, Users, LayoutGrid, Table2, Zap, Sparkles, Heart, Tag, Download, ExternalLink, Plus, Star, Clock, MapPin, Briefcase, Coffee, Music, Camera, Gamepad2, Dumbbell, BookOpen as BookOpenIcon, Lightbulb, Target, TrendingUp, Rocket, Github
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";

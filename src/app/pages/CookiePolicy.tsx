@@ -1,8 +1,8 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView, useScroll, useTransform } from "motion/react";
 import { Link } from "react-router";
 import {
-  ArrowRight, ChevronRight, Cookie, Shield, Database, Eye, EyeOff, Check, X, AlertCircle, Info, ExternalLink, Download, Key, Lock, Search, Trash2, History, Share2, Cpu, Server, Wifi, Smartphone, Monitor, Zap, Sparkles, Heart, Coffee, Code, BookOpen, Calendar, MapPin, Briefcase, DollarSign, Award, Star, Send, Copy, Github, Twitter, Globe, Wifi as WifiIcon, Bluetooth, Usb, MonitorSmartphone, HardDrive, Layers, Settings, SlidersHorizontal, ToggleLeft, ToggleRight, User, Hash, Fingerprint
+  ArrowRight, ChevronRight, Cookie, Shield, Database, Eye, EyeOff, Check, X, AlertCircle, Info, ExternalLink, Download, Key, Lock, Search, Trash2, History, Share2, Cpu, Server, Wifi, Smartphone, Monitor, Zap, Sparkles, Heart, Coffee, Code, BookOpen, Calendar, MapPin, Briefcase, DollarSign, Award, Star, Send, Copy, Github, Twitter, Globe, Wifi as WifiIcon, Bluetooth, Usb, MonitorSmartphone, HardDrive, Layers, Settings, SlidersHorizontal, ToggleLeft, ToggleRight, User, Hash, Fingerprint, Mail
 } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import Navbar from "../components/Navbar";
