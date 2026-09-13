@@ -22,6 +22,8 @@ const publicRoutes = [
   ["/terms", "Terms"],
   ["/cookie-policy", "Cookie Policy"],
   ["/security", "Security"],
+  ["/cookie", "Cookie"],
+  ["/policy", "Policy"],
 ] as const;
 
 for (const [route, name] of publicRoutes) {
