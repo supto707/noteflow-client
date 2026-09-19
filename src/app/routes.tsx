@@ -33,6 +33,7 @@ import Terms from "./pages/Terms";
 import CookiePolicy from "./pages/CookiePolicy";
 import Security from "./pages/Security";
 import Developer from "./pages/Developer";
+import EditorTest from "./pages/EditorTest";
 
 export const router = createBrowserRouter([
   {
@@ -60,6 +61,7 @@ export const router = createBrowserRouter([
       { path: "terms", Component: Terms },
       { path: "cookie-policy", Component: CookiePolicy },
       { path: "security", Component: Security },
+      { path: "__editor-test", Component: EditorTest },
       {
         path: "dashboard",
         element: <AuthGuard><DashboardLayout /></AuthGuard>,

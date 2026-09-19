@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, Search, Tag, Clock, Star, MoreHorizontal, Bold, Italic, Code, List, Hash, Link2, Image, FileText, GripVertical, Trash2, Copy, ArrowUp, ArrowDown, Type, Heading1, Heading2, Heading3, ListOrdered, CheckSquare, Quote, Minus, AlertCircle, Menu, X } from "lucide-react";
+import { Plus, Search, FileText, Trash2, Menu, X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { getUserWorkspace, getPages, getPageById, createPage, updatePageTitle, createBlock, replacePageBlocks, trashPage } from "../../lib/api";
@@ -14,10 +14,8 @@ const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 export default function Notes() {
   const { dark } = useTheme();
   const { user } = useAuth();
-  const [activeTag, setActiveTag] = useState("All");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<{ id: string; title: string; content: string; updated_at: string } | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState("");
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +78,6 @@ export default function Notes() {
   const activeBg = dark ? "rgba(99,87,232,0.12)" : "rgba(99,87,232,0.07)";
 
   const filtered = pages.filter(p =>
-    (activeTag === "All") &&
     p.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -90,7 +87,6 @@ export default function Notes() {
       const content = getBlocksContent(pageData.blocks || []);
       setSelected({ id: pageData.id, title: pageData.title, content, updated_at: pageData.updated_at });
       setEditContent(content);
-      setIsEditing(false);
     }
   }
 
@@ -177,16 +173,6 @@ export default function Notes() {
         </div>
       </div>
 
-      <div className="flex gap-1.5 overflow-x-auto px-4 pb-3" style={{ scrollbarWidth: "none" }}>
-        {["All"].map(t => (
-          <button key={t} onClick={() => setActiveTag(t)}
-            className="rounded-full flex-shrink-0 transition-all duration-150"
-            style={{ padding: "4px 12px", fontSize: 12, fontWeight: 500, border: "none", cursor: "pointer", background: activeTag === t ? "#6357E8" : (dark ? "rgba(255,255,255,0.07)" : "rgba(14,14,12,0.07)"), color: activeTag === t ? "white" : sub }}>
-            {t}
-          </button>
-        ))}
-      </div>
-
       <div className="flex-1 overflow-y-auto" style={{ scrollbarWidth: "none" }}>
         {filtered.map(page => (
           <motion.div key={page.id} whileHover={{ x: 2 }}
@@ -245,45 +231,21 @@ export default function Notes() {
         {selected ? (
           <>
             {/* Toolbar */}
-            <div className="flex items-center gap-2 border-b flex-shrink-0" style={{ padding: "10px 12px sm:px-7", borderColor: border }}>
+            <div className="flex items-center gap-2 border-b flex-shrink-0" style={{ padding: "10px 12px", borderColor: border }}>
               <button onClick={() => setMobileSidebarOpen(true)}
                 className="md:hidden rounded-md flex items-center justify-center flex-shrink-0"
                 style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}>
                 <Menu size={15} />
               </button>
-              <div className="hidden sm:flex items-center gap-1 mr-2">
-                {[Bold, Italic, Code].map((Icon, i) => (
-                  <button key={i} className="rounded-md flex items-center justify-center transition-colors"
-                    style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}
-                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = hoverBg)}
-                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}
-                    onClick={() => {
-                      // Focus the first editable block and apply formatting
-                      const firstBlock = document.querySelector('[contenteditable="true"]') as HTMLElement;
-                      if (firstBlock) {
-                        firstBlock.focus();
-                        const cmd = i === 0 ? "bold" : i === 1 ? "italic" : "code";
-                        document.execCommand(cmd);
-                      }
-                    }}>
-                    <Icon size={13} />
-                  </button>
-                ))}
-              </div>
-              <div style={{ width: 1, height: 18, background: border }} />
-              <div className="hidden sm:flex items-center gap-1">
-                {[List, Hash, Link2, Image].map((Icon, i) => (
-                  <button key={i} className="rounded-md flex items-center justify-center transition-colors"
-                    style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}
-                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = hoverBg)}
-                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}>
-                    <Icon size={13} />
-                  </button>
-                ))}
+              <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: sub }}>
+                <FileText size={13} />
+                <span className="hidden sm:inline" style={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {selected.title}
+                </span>
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <span className="hidden sm:inline" style={{ fontSize: 11, color: sub, fontFamily: "'Geist Mono', monospace" }}>
-                  {isSaving ? "Saving…" : lastSaved ? `Saved · ${lastSaved.toLocaleTimeString()}` : `Saved · ${new Date(selected.updated_at).toLocaleDateString()}`}
+                  {isSaving ? "Saving…" : lastSaved ? `Saved · ${lastSaved.toLocaleTimeString()}` : ""}
                 </span>
                 <button className="rounded-md flex items-center justify-center transition-colors"
                   style={{ width: 28, height: 28, background: "none", border: "none", color: sub, cursor: "pointer" }}
@@ -293,24 +255,11 @@ export default function Notes() {
                   title="Delete note">
                   <Trash2 size={13} />
                 </button>
-                <button className="rounded-lg flex items-center gap-1.5 transition-colors"
-                  style={{ padding: "5px 12px", background: "#6357E8", border: "none", color: "white", fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
-                  Share
-                </button>
-                <button style={{ background: "none", border: "none", color: sub, cursor: "pointer" }}>
-                  <MoreHorizontal size={15} />
-                </button>
               </div>
             </div>
 
             {/* Editor content */}
             <div className="flex-1 overflow-y-auto px-4 py-8 sm:px-16 lg:px-[64px] sm:pt-10 sm:pb-20" style={{ scrollbarWidth: "none" }}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center gap-1.5" style={{ fontSize: 12, color: sub }}>
-                  <Clock size={11} /> {new Date(selected.updated_at).toLocaleDateString()}
-                </div>
-              </div>
-
               {/* Editable title */}
               {editingTitle ? (
                 <input

@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
-import { GripVertical, Plus, Trash2, ArrowUp, ArrowDown, Copy, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare, Quote, Code, Minus, AlertCircle, Image as ImageIcon, ChevronDown, ChevronRight, Palette, FileText, Globe } from "lucide-react";
+import { GripVertical, Plus, Trash2, ArrowUp, ArrowDown, Copy, Type, Heading1, Heading2, Heading3, List, ListOrdered, CheckSquare, Quote, Code, Minus, AlertCircle, Image as ImageIcon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
-export type BlockType = "text" | "heading1" | "heading2" | "heading3" | "bullet_list_item" | "numbered_list_item" | "todo" | "quote" | "code" | "callout" | "divider" | "image" | "toggle" | "page" | "html" | "tabs";
+export type BlockType = "text" | "heading1" | "heading2" | "heading3" | "bullet_list_item" | "numbered_list_item" | "todo" | "quote" | "code" | "callout" | "divider" | "image";
 
 export interface EditorBlockData {
   id: string;
@@ -11,7 +11,6 @@ export interface EditorBlockData {
   content: string;
   checked?: boolean;
   expanded?: boolean;
-  color?: string;
   meta?: Record<string, any>;
 }
 
@@ -20,7 +19,7 @@ interface EditorBlockProps {
   onChange: (id: string, content: string) => void;
   onTypeChange: (id: string, type: BlockType) => void;
   onDelete: (id: string) => void;
-  onAddBelow: (id: string) => void;
+  onAddBelow: (id: string, type?: BlockType, content?: string, checked?: boolean) => void;
   onMoveUp: (id: string) => void;
   onMoveDown: (id: string) => void;
   onDuplicate: (id: string) => void;
@@ -29,45 +28,30 @@ interface EditorBlockProps {
   onIndent: (id: string) => void;
   onOutdent: (id: string) => void;
   onCheckToggle: (id: string, checked: boolean) => void;
-  onToggleExpand: (id: string) => void;
-  onColorChange: (id: string, color: string) => void;
   isFirst: boolean;
   isLast: boolean;
   indentLevel: number;
+  listNumber: number;
   autoFocus?: boolean;
 }
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
-const BLOCK_COLORS = [
-  { name: "Default", value: "default", bg: "transparent", text: "inherit" },
-  { name: "Gray", value: "gray", bg: "rgba(138,138,128,0.15)", text: "#8A8A80" },
-  { name: "Brown", value: "brown", bg: "rgba(139,90,43,0.15)", text: "#8B5A2B" },
-  { name: "Orange", value: "orange", bg: "rgba(245,158,11,0.15)", text: "#F59E0B" },
-  { name: "Yellow", value: "yellow", bg: "rgba(250,204,21,0.15)", text: "#EAB308" },
-  { name: "Green", value: "green", bg: "rgba(34,197,94,0.15)", text: "#22C55F" },
-  { name: "Blue", value: "blue", bg: "rgba(59,130,246,0.15)", text: "#3B82F6" },
-  { name: "Purple", value: "purple", bg: "rgba(99,87,232,0.15)", text: "#6357E8" },
-  { name: "Pink", value: "pink", bg: "rgba(236,72,153,0.15)", text: "#EC4899" },
-  { name: "Red", value: "red", bg: "rgba(239,68,68,0.15)", text: "#EF4444" },
-];
-
 export default function EditorBlock({
   block, onChange, onTypeChange, onDelete, onAddBelow,
   onMoveUp, onMoveDown, onDuplicate, onFocusNext, onFocusPrev,
-  onIndent, onOutdent, onCheckToggle, onToggleExpand, onColorChange,
-  isFirst, isLast, indentLevel, autoFocus
+  onIndent, onOutdent, onCheckToggle,
+  isFirst, isLast, indentLevel, listNumber, autoFocus
 }: EditorBlockProps) {
   const { dark } = useTheme();
   const [showHandle, setShowHandle] = useState(false);
   const [showBlockMenu, setShowBlockMenu] = useState(false);
   const [showSlashMenu, setShowSlashMenu] = useState(false);
-  const [showColorMenu, setShowColorMenu] = useState(false);
   const [slashFilter, setSlashFilter] = useState("");
+  const [slashIndex, setSlashIndex] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
   const blockMenuRef = useRef<HTMLDivElement>(null);
   const slashMenuRef = useRef<HTMLDivElement>(null);
-  const colorMenuRef = useRef<HTMLDivElement>(null);
   const suppressSync = useRef(false);
 
   const fg = dark ? "#E8E8E0" : "#0E0E0C";
@@ -76,8 +60,6 @@ export default function EditorBlock({
   const hoverBg = dark ? "rgba(255,255,255,0.04)" : "rgba(14,14,12,0.03)";
   const cardBg = dark ? "#1A1A18" : "#FFFFFF";
   const accent = "#6357E8";
-
-  const blockColor = BLOCK_COLORS.find(c => c.value === (block.color || "default"));
 
   // Sync content from props to DOM only when content changes externally
   useEffect(() => {
@@ -108,11 +90,34 @@ export default function EditorBlock({
     function handleClick(e: MouseEvent) {
       if (blockMenuRef.current && !blockMenuRef.current.contains(e.target as Node)) setShowBlockMenu(false);
       if (slashMenuRef.current && !slashMenuRef.current.contains(e.target as Node)) setShowSlashMenu(false);
-      if (colorMenuRef.current && !colorMenuRef.current.contains(e.target as Node)) setShowColorMenu(false);
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  // Reset slash menu index when filter changes
+  useEffect(() => {
+    setSlashIndex(0);
+  }, [slashFilter]);
+
+  const slashCommands = [
+    { type: "text" as BlockType, label: "Text", icon: Type, description: "Plain text" },
+    { type: "heading1" as BlockType, label: "Heading 1", icon: Heading1, description: "Large heading" },
+    { type: "heading2" as BlockType, label: "Heading 2", icon: Heading2, description: "Medium heading" },
+    { type: "heading3" as BlockType, label: "Heading 3", icon: Heading3, description: "Small heading" },
+    { type: "bullet_list_item" as BlockType, label: "Bullet list", icon: List, description: "Bulleted list" },
+    { type: "numbered_list_item" as BlockType, label: "Numbered list", icon: ListOrdered, description: "Numbered list" },
+    { type: "todo" as BlockType, label: "To-do", icon: CheckSquare, description: "Checkbox list" },
+    { type: "quote" as BlockType, label: "Quote", icon: Quote, description: "Block quote" },
+    { type: "callout" as BlockType, label: "Callout", icon: AlertCircle, description: "Highlighted callout" },
+    { type: "code" as BlockType, label: "Code", icon: Code, description: "Code block" },
+    { type: "divider" as BlockType, label: "Divider", icon: Minus, description: "Horizontal divider" },
+    { type: "image" as BlockType, label: "Image", icon: ImageIcon, description: "Embed image" },
+  ];
+
+  const filteredSlash = slashCommands.filter(cmd =>
+    cmd.label.toLowerCase().includes(slashFilter.toLowerCase())
+  );
 
   const handleInput = useCallback(() => {
     if (contentRef.current) {
@@ -122,9 +127,72 @@ export default function EditorBlock({
     }
   }, [block.id, onChange]);
 
+  // Markdown shortcuts: convert block type as you type prefixes
+  const applyMarkdownShortcut = useCallback((text: string): boolean => {
+    const shortcuts: Array<{ prefix: string; type: BlockType; consumes: string }> = [
+      { prefix: "# ", type: "heading1", consumes: "# " },
+      { prefix: "## ", type: "heading2", consumes: "## " },
+      { prefix: "### ", type: "heading3", consumes: "### " },
+      { prefix: "- ", type: "bullet_list_item", consumes: "- " },
+      { prefix: "* ", type: "bullet_list_item", consumes: "* " },
+      { prefix: "1. ", type: "numbered_list_item", consumes: "1. " },
+      { prefix: "[] ", type: "todo", consumes: "[] " },
+      { prefix: "[ ] ", type: "todo", consumes: "[ ] " },
+      { prefix: "> ", type: "quote", consumes: "> " },
+      { prefix: "``` ", type: "code", consumes: "``` " },
+      { prefix: "--- ", type: "divider", consumes: "--- " },
+    ];
+    for (const sc of shortcuts) {
+      if (text.startsWith(sc.prefix)) {
+        const rest = text.slice(sc.prefix.length);
+        onTypeChange(block.id, sc.type);
+        suppressSync.current = true;
+        onChange(block.id, rest);
+        if (contentRef.current) contentRef.current.textContent = rest;
+        return true;
+      }
+    }
+    return false;
+  }, [block.id, onChange, onTypeChange]);
+
+  const handleSlashSelect = useCallback((type: BlockType) => {
+    onTypeChange(block.id, type);
+    setShowSlashMenu(false);
+    setSlashFilter("");
+    if (contentRef.current) contentRef.current.textContent = "";
+    suppressSync.current = true;
+    onChange(block.id, "");
+    contentRef.current?.focus();
+  }, [block.id, onTypeChange, onChange]);
+
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     const el = contentRef.current;
     if (!el) return;
+
+    // Slash menu navigation
+    if (showSlashMenu) {
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setSlashIndex(prev => Math.min(prev + 1, filteredSlash.length - 1));
+        return;
+      }
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setSlashIndex(prev => Math.max(prev - 1, 0));
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const cmd = filteredSlash[slashIndex];
+        if (cmd) handleSlashSelect(cmd.type);
+        return;
+      }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setShowSlashMenu(false);
+        return;
+      }
+    }
 
     const selection = window.getSelection();
     const textContent = el.textContent || "";
@@ -141,18 +209,59 @@ export default function EditorBlock({
       isAtEnd = caretOffset >= textContent.length;
     }
 
+    // Markdown shortcut: trigger on space when block content + space matches a prefix
+    if (e.key === " " && textContent.length > 0) {
+      const converted = applyMarkdownShortcut(textContent + " ");
+      if (converted) {
+        e.preventDefault();
+        return;
+      }
+    }
+
+    const isListType = block.type === "bullet_list_item" || block.type === "numbered_list_item" || block.type === "todo";
+
+    // Enter: continue lists, else new block
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       e.stopPropagation();
-      onAddBelow(block.id);
+      if (isListType) {
+        if (textContent.trim() === "") {
+          // Empty list item: convert back to text (Notion behavior)
+          onTypeChange(block.id, "text");
+          suppressSync.current = true;
+          onChange(block.id, "");
+          if (contentRef.current) contentRef.current.textContent = "";
+        } else {
+          onAddBelow(block.id, block.type, "", block.type === "todo" ? false : undefined);
+        }
+      } else if (block.type === "code") {
+        // In code blocks, Enter inserts a line break instead of new block
+        document.execCommand("insertText", false, "\n");
+      } else {
+        onAddBelow(block.id);
+      }
       return;
     }
 
-    if (e.key === "Backspace" && isAtStart && textContent.length === 0) {
-      e.preventDefault();
-      onDelete(block.id);
-      onFocusPrev(block.id);
-      return;
+    // Backspace: convert non-text blocks to text before deleting
+    if (e.key === "Backspace" && isAtStart) {
+      if (block.type !== "text" && textContent.length === 0) {
+        e.preventDefault();
+        onTypeChange(block.id, "text");
+        return;
+      }
+      if (block.type !== "text" && isAtStart && textContent.length > 0) {
+        // Caret at start of non-empty non-text block: convert to text first
+        e.preventDefault();
+        onTypeChange(block.id, "text");
+        return;
+      }
+      if (textContent.length === 0) {
+        e.preventDefault();
+        onDelete(block.id);
+        onFocusPrev(block.id);
+        return;
+      }
     }
 
     if (e.key === "ArrowUp" && isAtStart) {
@@ -194,7 +303,7 @@ export default function EditorBlock({
         }
       }, 10);
     }
-  }, [block.id, onAddBelow, onDelete, onFocusPrev, onFocusNext, onIndent, onOutdent]);
+  }, [block.id, block.type, onAddBelow, onDelete, onFocusPrev, onFocusNext, onIndent, onOutdent, onTypeChange, onChange, showSlashMenu, slashIndex, filteredSlash.length, applyMarkdownShortcut, handleSlashSelect]);
 
   const handleKeyUp = useCallback((e: React.KeyboardEvent) => {
     if (showSlashMenu && contentRef.current) {
@@ -204,15 +313,6 @@ export default function EditorBlock({
     }
   }, [showSlashMenu]);
 
-  const handleSlashSelect = useCallback((type: BlockType) => {
-    onTypeChange(block.id, type);
-    setShowSlashMenu(false);
-    setSlashFilter("");
-    if (contentRef.current) contentRef.current.textContent = "";
-    suppressSync.current = true;
-    onChange(block.id, "");
-    contentRef.current?.focus();
-  }, [block.id, onTypeChange, onChange]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent) => {
     e.preventDefault();
@@ -228,27 +328,6 @@ export default function EditorBlock({
     { label: "Move down", icon: ArrowDown, action: () => { onMoveDown(block.id); setShowBlockMenu(false); }, disabled: isLast },
   ];
 
-  const slashCommands = [
-    { type: "text" as BlockType, label: "Text", icon: Type, description: "Plain text" },
-    { type: "heading1" as BlockType, label: "Heading 1", icon: Heading1, description: "Large heading" },
-    { type: "heading2" as BlockType, label: "Heading 2", icon: Heading2, description: "Medium heading" },
-    { type: "heading3" as BlockType, label: "Heading 3", icon: Heading3, description: "Small heading" },
-    { type: "bullet_list_item" as BlockType, label: "Bullet list", icon: List, description: "Bulleted list" },
-    { type: "numbered_list_item" as BlockType, label: "Numbered list", icon: ListOrdered, description: "Numbered list" },
-    { type: "todo" as BlockType, label: "To-do", icon: CheckSquare, description: "Checkbox list" },
-    { type: "toggle" as BlockType, label: "Toggle", icon: ChevronRight, description: "Collapsible list" },
-    { type: "quote" as BlockType, label: "Quote", icon: Quote, description: "Block quote" },
-    { type: "callout" as BlockType, label: "Callout", icon: AlertCircle, description: "Highlighted callout" },
-    { type: "code" as BlockType, label: "Code", icon: Code, description: "Code block" },
-    { type: "html" as BlockType, label: "HTML", icon: Globe, description: "Embed HTML" },
-    { type: "page" as BlockType, label: "Page", icon: FileText, description: "Nested page" },
-    { type: "divider" as BlockType, label: "Divider", icon: Minus, description: "Horizontal divider" },
-    { type: "image" as BlockType, label: "Image", icon: ImageIcon, description: "Embed image" },
-  ];
-
-  const filteredSlash = slashCommands.filter(cmd =>
-    cmd.label.toLowerCase().includes(slashFilter.toLowerCase())
-  );
 
   const commonContentEditableProps = {
     ref: contentRef,
@@ -270,14 +349,6 @@ export default function EditorBlock({
   };
 
   const renderBlockContent = () => {
-    const colorStyle = blockColor && blockColor.value !== "default" ? {
-      background: blockColor.bg,
-      color: blockColor.text,
-      borderRadius: 4,
-      padding: "2px 4px",
-      margin: "-2px -4px",
-    } : {};
-
     switch (block.type) {
       case "heading1":
         return (
@@ -342,7 +413,7 @@ export default function EditorBlock({
       case "numbered_list_item":
         return (
           <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-            <span style={{ color: sub, fontSize: 14, marginTop: 6, flexShrink: 0, minWidth: 20, fontFamily: "'Geist Mono', monospace", userSelect: "none" }}>1.</span>
+            <span style={{ color: sub, fontSize: 14, marginTop: 6, flexShrink: 0, minWidth: 20, fontFamily: "'Geist Mono', monospace", userSelect: "none" }}>{listNumber}.</span>
             <div
               {...commonContentEditableProps}
               style={{
@@ -377,24 +448,6 @@ export default function EditorBlock({
             />
           </div>
         );
-      case "toggle":
-        return (
-          <div style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
-            <button onClick={() => onToggleExpand(block.id)} style={{ background: "none", border: "none", color: sub, cursor: "pointer", padding: 0, marginTop: 2, flexShrink: 0 }}>
-              {block.expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-            </button>
-            <div
-              {...commonContentEditableProps}
-              style={{
-                ...commonContentEditableProps.style,
-                flex: 1,
-                fontSize: 14,
-                color: fg,
-                lineHeight: 1.7,
-              }}
-            />
-          </div>
-        );
       case "quote":
         return (
           <div style={{ borderLeft: `3px solid ${accent}`, paddingLeft: 16, margin: "4px 0" }}>
@@ -416,22 +469,6 @@ export default function EditorBlock({
             background: dark ? "rgba(255,255,255,0.04)" : "rgba(14,14,12,0.04)",
             borderRadius: 8, padding: "12px 16px", margin: "4px 0", border: `1px solid ${border}`,
           }}>
-            <div
-              {...commonContentEditableProps}
-              style={{
-                ...commonContentEditableProps.style,
-                fontSize: 13, color: fg, lineHeight: 1.6, fontFamily: "'Geist Mono', monospace", whiteSpace: "pre-wrap",
-              }}
-            />
-          </div>
-        );
-      case "html":
-        return (
-          <div style={{
-            background: dark ? "rgba(255,255,255,0.04)" : "rgba(14,14,12,0.04)",
-            borderRadius: 8, padding: "12px 16px", margin: "4px 0", border: `1px solid ${border}`,
-          }}>
-            <div style={{ fontSize: 10, color: sub, marginBottom: 6, fontFamily: "'Geist Mono', monospace" }}>HTML Block</div>
             <div
               {...commonContentEditableProps}
               style={{
@@ -474,22 +511,6 @@ export default function EditorBlock({
             ) : (
               <span style={{ fontSize: 13, color: sub }}>Add image URL or paste</span>
             )}
-          </div>
-        );
-      case "page":
-        return (
-          <div style={{
-            display: "flex", alignItems: "center", gap: 8, padding: "8px 12px",
-            background: dark ? "rgba(255,255,255,0.04)" : "rgba(14,14,12,0.04)", borderRadius: 8, border: `1px solid ${border}`,
-          }}>
-            <FileText size={16} style={{ color: sub, flexShrink: 0 }} />
-            <div
-              {...commonContentEditableProps}
-              style={{
-                ...commonContentEditableProps.style,
-                flex: 1, fontSize: 14, color: fg,
-              }}
-            />
           </div>
         );
       default: // text
@@ -560,18 +581,21 @@ export default function EditorBlock({
         <div ref={slashMenuRef} style={{ position: "absolute", left: indentLevel * 24, top: "100%", zIndex: 50, width: 260, maxHeight: 320, background: cardBg, border: `1px solid ${border}`, borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", overflow: "hidden" }}>
           <div style={{ padding: "8px 12px 4px", fontSize: 10, fontWeight: 600, color: sub, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'Geist Mono', monospace" }}>Basic blocks</div>
           <div style={{ maxHeight: 280, overflowY: "auto", scrollbarWidth: "none" }}>
-            {filteredSlash.map(cmd => {
+            {filteredSlash.length === 0 && (
+              <div style={{ padding: "12px", fontSize: 13, color: sub }}>No results</div>
+            )}
+            {filteredSlash.map((cmd, i) => {
               const Icon = cmd.icon;
+              const isSelected = i === slashIndex;
               return (
                 <button key={cmd.type} onClick={() => handleSlashSelect(cmd.type)}
-                  style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", textAlign: "left", transition: "background 0.1s" }}
-                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = hoverBg)}
-                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "none")}>
+                  style={{ display: "flex", alignItems: "center", gap: 10, width: "100%", padding: "8px 12px", background: isSelected ? hoverBg : "none", border: "none", cursor: "pointer", textAlign: "left", transition: "background 0.1s" }}
+                  onMouseEnter={() => setSlashIndex(i)}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: dark ? "rgba(255,255,255,0.06)" : "rgba(14,14,12,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    <Icon size={15} style={{ color: sub }} />
+                    <Icon size={15} style={{ color: isSelected ? accent : sub }} />
                   </div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: fg, lineHeight: 1.3 }}>{cmd.label}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: isSelected ? accent : fg, lineHeight: 1.3 }}>{cmd.label}</div>
                     <div style={{ fontSize: 11, color: sub, lineHeight: 1.3 }}>{cmd.description}</div>
                   </div>
                 </button>
