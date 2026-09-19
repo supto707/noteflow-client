@@ -133,11 +133,12 @@ export default function BlockEditor({ initialContent, pageId, onSave, readOnly }
     });
   }, []);
 
-  const handleAddBelow = useCallback((id: string) => {
+  const handleAddBelow = useCallback((id: string, type?: BlockType, content?: string, checked?: boolean) => {
     const newBlock: EditorBlockData = {
       id: generateBlockId(),
-      type: "text",
-      content: "",
+      type: type || "text",
+      content: content || "",
+      ...(type === "todo" ? { checked: checked ?? false } : {}),
     };
     setBlocks(prev => {
       const idx = prev.findIndex(b => b.id === id);
@@ -221,14 +222,6 @@ export default function BlockEditor({ initialContent, pageId, onSave, readOnly }
     setBlocks(prev => prev.map(b => b.id === id ? { ...b, checked } : b));
   }, []);
 
-  const handleToggleExpand = useCallback((id: string) => {
-    setBlocks(prev => prev.map(b => b.id === id ? { ...b, expanded: !b.expanded } : b));
-  }, []);
-
-  const handleColorChange = useCallback((id: string, color: string) => {
-    setBlocks(prev => prev.map(b => b.id === id ? { ...b, color } : b));
-  }, []);
-
   const handleAddBlockAtEnd = useCallback(() => {
     const newBlock: EditorBlockData = {
       id: generateBlockId(),
@@ -244,54 +237,55 @@ export default function BlockEditor({ initialContent, pageId, onSave, readOnly }
   return (
     <div style={{ position: "relative" }}>
       <AnimatePresence mode="popLayout">
-        {blocks.map((block, index) => (
-          <motion.div
-            key={block.id}
-            layout
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8, height: 0, marginBottom: 0 }}
-            transition={{ duration: 0.15, ease: EASE }}
-          >
-            <EditorBlock
-              block={block}
-              onChange={handleBlockChange}
-              onTypeChange={handleTypeChange}
-              onDelete={handleDelete}
-              onAddBelow={handleAddBelow}
-              onMoveUp={handleMoveUp}
-              onMoveDown={handleMoveDown}
-              onDuplicate={handleDuplicate}
-              onFocusNext={handleFocusNext}
-              onFocusPrev={handleFocusPrev}
-              onIndent={handleIndent}
-              onOutdent={handleOutdent}
-              onCheckToggle={handleCheckToggle}
-              onToggleExpand={handleToggleExpand}
-              onColorChange={handleColorChange}
-              isFirst={index === 0}
-              isLast={index === blocks.length - 1}
-              indentLevel={block.meta?.indent || 0}
-              autoFocus={block.id === focusedBlockId}
-            />
-          </motion.div>
-        ))}
+        {blocks.map((block, index) => {
+          // Compute 1-based list number: consecutive numbered items at same indent restart counting
+          let listNumber = 1;
+          if (block.type === "numbered_list_item") {
+            const indent = block.meta?.indent || 0;
+            for (let j = index - 1; j >= 0; j--) {
+              const prev = blocks[j];
+              const prevIndent = prev.meta?.indent || 0;
+              if (prevIndent < indent) break;
+              if (prev.type === "numbered_list_item" && prevIndent === indent) {
+                listNumber++;
+              } else if (prev.type !== "numbered_list_item" && prevIndent === indent && prev.type !== "text") {
+                break;
+              }
+            }
+          }
+          return (
+            <motion.div
+              key={block.id}
+              layout
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8, height: 0, marginBottom: 0 }}
+              transition={{ duration: 0.15, ease: EASE }}
+            >
+              <EditorBlock
+                block={block}
+                onChange={handleBlockChange}
+                onTypeChange={handleTypeChange}
+                onDelete={handleDelete}
+                onAddBelow={handleAddBelow}
+                onMoveUp={handleMoveUp}
+                onMoveDown={handleMoveDown}
+                onDuplicate={handleDuplicate}
+                onFocusNext={handleFocusNext}
+                onFocusPrev={handleFocusPrev}
+                onIndent={handleIndent}
+                onOutdent={handleOutdent}
+                onCheckToggle={handleCheckToggle}
+                isFirst={index === 0}
+                isLast={index === blocks.length - 1}
+                indentLevel={block.meta?.indent || 0}
+                listNumber={listNumber}
+                autoFocus={block.id === focusedBlockId}
+              />
+            </motion.div>
+          );
+        })}
       </AnimatePresence>
-
-      {blocks.length === 0 && (
-        <div
-          onClick={handleAddBlockAtEnd}
-          style={{
-            padding: "12px 0",
-            fontSize: 14,
-            color: dark ? "rgba(255,255,255,0.15)" : "rgba(14,14,12,0.2)",
-            cursor: "text",
-            fontStyle: "italic",
-          }}
-        >
-          Click to add a block, or type / for commands
-        </div>
-      )}
 
       <div
         className="flex items-center gap-2"
